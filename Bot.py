@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from youtube_search.yt import YT
 from youtube_search.yt import YTDLSource
 from discord.ext import commands
+from discord.ext import tasks
 from discord.utils import get
 
 load_dotenv()
@@ -18,7 +19,6 @@ bot = commands.Bot(command_prefix = '!')
 client = discord.Client()
 
 resultsx = []
-players = {}
 queue = []
 
 @bot.command(name='play')
@@ -36,6 +36,7 @@ async def play(ctx, *args):
                     if ctx.voice_client.is_playing():
                         queue.append(url)
                         await ctx.send('Your request was added to the queue.')
+                        resultsx.clear()
                 else:
                     if ctx.voice_client != user_channel and ctx.voice_client != None:
                         if ctx.voice_client.is_playing() == False:
@@ -43,18 +44,25 @@ async def play(ctx, *args):
                             player = await YTDLSource.from_url(url)
                             vc.play(player)
                             resultsx.clear()
+                            #print('vc:')
+                            #print(vc)
                         else:
                             await ctx.send('Sorry, I am playing music in another channel.')
+                            resultsx.clear()
                     elif ctx.voice_client != user_channel:
                         vc = await user_channel.connect()
                         player = await YTDLSource.from_url(url)
                         vc.play(player)
                         resultsx.clear()
+                        #print('vc:')
+                        #print(vc)
                     else:
                         vc = ctx.voice_client
                         player = await YTDLSource.from_url(url)
                         vc.play(player)
                         resultsx.clear()
+                        #print('vc:')
+                        #print(vc)
         elif args[0] == '2':
             if len(resultsx) == 0:
                 await ctx.send('Please make a request before choosing a number.')
@@ -64,6 +72,7 @@ async def play(ctx, *args):
                     if ctx.voice_client.is_playing():
                         queue.append(url)
                         await ctx.send('Your request was added to the queue.')
+                        resultsx.clear()
                 else:                            
                     if ctx.voice_client != user_channel and ctx.voice_client != None:
                         if ctx.voice_client.is_playing() == False:
@@ -73,6 +82,7 @@ async def play(ctx, *args):
                             resultsx.clear()
                         else:
                             await ctx.send('Sorry, I am playing music in another channel.')
+                            resultsx.clear()
                     elif ctx.voice_client != user_channel:
                         vc = await user_channel.connect()
                         player = await YTDLSource.from_url(url)
@@ -92,6 +102,7 @@ async def play(ctx, *args):
                     if ctx.voice_client.is_playing():
                         queue.append(url)
                         await ctx.send('Your request was added to the queue.')
+                        resultsx.clear()
                 else:                
                     if ctx.voice_client != user_channel and ctx.voice_client != None:
                         if ctx.voice_client.is_playing() == False:
@@ -101,6 +112,7 @@ async def play(ctx, *args):
                             resultsx.clear()
                         else:
                             await ctx.send('Sorry, I am playing music in another channel.')
+                            resultsx.clear()
                     elif ctx.voice_client != user_channel:
                         vc = await user_channel.connect()
                         player = await YTDLSource.from_url(url)
@@ -120,6 +132,7 @@ async def play(ctx, *args):
                     if ctx.voice_client.is_playing():
                         queue.append(url)
                         await ctx.send('Your request was added to the queue.')
+                        resultsx.clear()
                 else:                 
                     if ctx.voice_client != user_channel and ctx.voice_client != None:
                         if ctx.voice_client.is_playing() == False:
@@ -129,6 +142,7 @@ async def play(ctx, *args):
                             resultsx.clear()
                         else:
                             await ctx.send('Sorry, I am playing music in another channel.')
+                            resultsx.clear()
                     elif ctx.voice_client != user_channel:
                         vc = await user_channel.connect()
                         player = await YTDLSource.from_url(url)
@@ -148,6 +162,7 @@ async def play(ctx, *args):
                     if ctx.voice_client.is_playing():
                         queue.append(url)
                         await ctx.send('Your request was added to the queue.')
+                        resultsx.clear()
                 else:                 
                     if ctx.voice_client != user_channel and ctx.voice_client != None:
                         if ctx.voice_client.is_playing() == False:
@@ -157,6 +172,7 @@ async def play(ctx, *args):
                             resultsx.clear()
                         else:
                             await ctx.send('Sorry, I am playing music in another channel.')
+                            resultsx.clear()
                     elif ctx.voice_client != user_channel:
                         vc = await user_channel.connect()
                         player = await YTDLSource.from_url(url)
@@ -223,19 +239,56 @@ async def play(ctx):
     else:
             await ctx.send('I am already paused.')
 
-#@bot.event
-#async def on_message(message):
-    #if
-        #await ctx.send('Haha Jay is gay!')
+@bot.command(name='skip')
+async def skip(ctx):
+    if ctx.voice_client is not None:
+        if ctx.voice_client.is_playing():
+            if len(queue) > 0:
+                await ctx.voice_client.stop()
+                player = await YTDLSource.from_url(queue[0])
+                await ctx.voice_client.play(player)
+            else:
+                await ctx.send('There are no songs in the queue to skip to.')
+
+@tasks.loop(seconds=10)
+async def queue_play():
+    guild = bot.guilds[0]
+    vc = guild.voice_client
+    if vc != None:
+        print(vc)
+        if client.voice_client.is_playing() == False:
+            print('hello')
+            if len(queue) > 0:
+                print(len(queue))
+                player = await YTDLSource.from_url(queue[0])
+                queue.pop[0]
+                await vc.play(player)
+            else:
+                return
+        else:
+            return
+    else:
+        return
+
+@bot.command(name='lenqueue')
+async def lenqueue(ctx):
+    await ctx.send(len(queue))
+
+@bot.command(name='jay')
+async def jay(ctx):
+    await ctx.send('Haha Jay is gay!')
 
 @bot.command(name='state')
 async def state(ctx):
     await ctx.send(ctx.message.author.voice)
     await ctx.send(ctx.voice_client.is_playing())
+    #guild = bot.guilds[0]
+    #await ctx.send(guild.voice_client)
 
 @bot.event
 async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')
+    queue_play.start()
 
 @bot.event
 async def on_voice_state_update(member, before, after):
@@ -244,15 +297,6 @@ async def on_voice_state_update(member, before, after):
             voice_client = get(bot.voice_clients, channel=before.channel)
             if voice_client:
                 await voice_client.disconnect()
-
-    if before.channel is not None and before.channel == after.channel and member == after.channel.guild.me:
-        if after.channel.guild.voice_client.is_playing() == False:
-            if len(queue) > 0:
-                voice_client = get(bot.voice_clients, channel = after.channel)
-                player = await YTDLSource.from_url(queue[0])
-                await voice_client.play(player)
-                queue.pop[0]
-
 
 
 bot.run(token)
