@@ -19,7 +19,7 @@ bot = commands.Bot(command_prefix = '!')
 client = discord.Client()
 
 resultsx = []
-queue = []
+q = []
 
 @bot.command(name='play')
 async def play(ctx, *args):
@@ -34,7 +34,7 @@ async def play(ctx, *args):
                 url = 'https://www.youtube.com' + resultsx[0][1]
                 if ctx.voice_client != None:
                     if ctx.voice_client.is_playing():
-                        queue.append(url)
+                        q.append(url)
                         await ctx.send('Your request was added to the queue.')
                         resultsx.clear()
                 else:
@@ -70,7 +70,7 @@ async def play(ctx, *args):
                 url = 'https://www.youtube.com' + resultsx[1][1]
                 if ctx.voice_client != None:                
                     if ctx.voice_client.is_playing():
-                        queue.append(url)
+                        q.append(url)
                         await ctx.send('Your request was added to the queue.')
                         resultsx.clear()
                 else:                            
@@ -100,7 +100,7 @@ async def play(ctx, *args):
                 url = 'https://www.youtube.com' + resultsx[2][1]
                 if ctx.voice_client != None:                
                     if ctx.voice_client.is_playing():
-                        queue.append(url)
+                        q.append(url)
                         await ctx.send('Your request was added to the queue.')
                         resultsx.clear()
                 else:                
@@ -130,7 +130,7 @@ async def play(ctx, *args):
                 url = 'https://www.youtube.com' + resultsx[3][1]
                 if ctx.voice_client != None:                
                     if ctx.voice_client.is_playing():
-                        queue.append(url)
+                        q.append(url)
                         await ctx.send('Your request was added to the queue.')
                         resultsx.clear()
                 else:                 
@@ -160,7 +160,7 @@ async def play(ctx, *args):
                 url = 'https://www.youtube.com' + resultsx[4][1] 
                 if ctx.voice_client != None:                
                     if ctx.voice_client.is_playing():
-                        queue.append(url)
+                        q.append(url)
                         await ctx.send('Your request was added to the queue.')
                         resultsx.clear()
                 else:                 
@@ -205,7 +205,7 @@ async def url(ctx, url):
         if url.startswith('https://www.youtube.com/watch?v=') or url.startswith('www.youtube.com/watch?v='):
             if ctx.voice_client != None:
                 if ctx.voice_client.is_playing():
-                    queue.append(url)
+                    q.append(url)
                     await ctx.send('Your request was added to the queue.')
             else: 
                 if ctx.voice_client != user_channel and ctx.voice_client != None:
@@ -243,10 +243,13 @@ async def play(ctx):
 async def skip(ctx):
     if ctx.voice_client is not None:
         if ctx.voice_client.is_playing():
-            if len(queue) > 0:
-                await ctx.voice_client.stop()
-                player = await YTDLSource.from_url(queue[0])
-                await ctx.voice_client.play(player)
+            if len(q) > 0:
+                ctx.voice_client.stop()
+                player = await YTDLSource.from_url(q[0])
+                ctx.voice_client.play(player)
+                q.pop(0)
+                #if len(queue) > 1:
+                    #queue = queue[1:]                
             else:
                 await ctx.send('There are no songs in the queue to skip to.')
 
@@ -256,23 +259,22 @@ async def queue_play():
     vc = guild.voice_client
     if vc != None:
         print(vc)
-        if client.voice_client.is_playing() == False:
+        if vc.is_playing() == False:
             print('hello')
-            if len(queue) > 0:
-                print(len(queue))
-                player = await YTDLSource.from_url(queue[0])
-                queue.pop[0]
-                await vc.play(player)
-            else:
-                return
-        else:
-            return
-    else:
-        return
+            if len(q) > 0:
+                print(len(q))
+                print(q[0])
+                player = await YTDLSource.from_url(q[0])
+                print(player)
+                #q = q[1:]
+                vc.play(player)
+                q.pop(0)
+                #if len(queue) > 1:
+                    #queue = queue[1:]
 
 @bot.command(name='lenqueue')
 async def lenqueue(ctx):
-    await ctx.send(len(queue))
+    await ctx.send(len(q))
 
 @bot.command(name='jay')
 async def jay(ctx):
@@ -280,10 +282,11 @@ async def jay(ctx):
 
 @bot.command(name='state')
 async def state(ctx):
-    await ctx.send(ctx.message.author.voice)
-    await ctx.send(ctx.voice_client.is_playing())
-    #guild = bot.guilds[0]
-    #await ctx.send(guild.voice_client)
+    #await ctx.send(ctx.message.author.voice)
+    #await ctx.send(ctx.voice_client.is_playing())
+    guild = bot.guilds[0]
+    await ctx.send(guild.voice_client)
+    await ctx.send(guild.voice_client.is_playing())
 
 @bot.event
 async def on_ready():
