@@ -229,7 +229,7 @@ async def url(ctx, url):
 @bot.command(name='pause')
 async def play(ctx):
     if ctx.voice_client is None:
-        messages = ['Dumb shit.', 'I need to be playing music to pause, you nonce.', 'Brainless fuck.']
+        messages = ["I need to be playing music to pause"]
         await ctx.send(random.choice(messages))
     elif ctx.voice_client.is_playing():
         if ctx.voice_client.channel != ctx.message.author.voice.channel:
@@ -275,10 +275,6 @@ async def queue_play():
 @bot.command(name='lenqueue')
 async def lenqueue(ctx):
     await ctx.send(len(q))
-
-@bot.command(name='jay')
-async def jay(ctx):
-    await ctx.send('Haha Jay is gay!')
 
 @bot.command(name='state')
 async def state(ctx):
